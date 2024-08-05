@@ -104,17 +104,17 @@ def ask_question_route():
                 # Save the answer dictionary to a file
                 with open(ans_path, 'w') as f:
                     json.dump(que_ans_dict, f)
-                
                 # Reload the answers
                 with open(ans_path, 'r') as js:
                     ans_dict = json.load(js)
                 res_ans = ans_dict[query_text][selected_language]
-            
+            return jsonify({'answer': res_ans})
         elif (ans_dict['doc']==selected_file) and (list(ans_dict.keys())[1]== query_text):
             res_ans = ans_dict[query_text][selected_language]
-        return jsonify({'answer': res_ans})
+            return jsonify({'answer': res_ans})
     else:
-        return jsonify({'answer': 'Answer Not Found'})
+        res_ans = 'Answer Not Found'
+        return jsonify({'answer': res_ans})
     
 
 if __name__ == '__main__':
