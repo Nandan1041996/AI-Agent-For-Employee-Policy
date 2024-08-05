@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            margin: 0; /* Fixed margin */
+            padding: 0;
+            font-size: 15px;
+        }
+        .container {
+            width: 80%;
+            max-width: 1100px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 15px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin: 0;
+            font-size: 2rem;
+        }
+        .main-content {
+            display: flex;
+            justify-content: space-between; 
+            font-size: 15px;
+        } 
+        .left-panel {
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+            gap: -10px;
+            margin-left: 0px;
+        }
+        .right-panel {
+            width: 80%; /* Adjusted to fit with the left panel */
+            display: flex;
+            flex-direction: column;
+            margin-left: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input[type="file"] {
+            width: 80%; /* Medium size */
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            padding: 8px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 40%; /* Medium size */
+            background: green;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        } 
+        button:hover {
+            background: darkgreen;
+        }
+        textarea {
+            width: 100%; /* Larger width */
+            height: 39px; /* Larger height */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        select {
+            width: 80%; /* Ensure select takes up full width */
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: #fff;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        .chat-box {
+            margin-top: 10px; /* Reduced top margin */
+            width: 90%; /* Reduced width */
+            border: 1px solid #ccc;
+            padding: 25px;
+            height: 80%;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 15px;
+        }
+        .file-list {
+            margin-top: 15px;
+            width: 80%;
+        }
+        .file-list ul {
+            list-style-type: disc; /* Changed from bullets to disc */
+            padding: 0;
+            font-size: 15px;
+        }
+        .file-item {
+            margin: 8px 0;
+            padding: 8px;
+            background: #f8f8f8;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+        .file-item a {
+            color: #dc3545;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+            font-size: 12px;
+        }
+        .file-item a:hover {
+            color: #c82333;
+        }
+        .message-block {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 15px;
+        }
+        .message-block .message {
+            margin: 0;
+            padding: 8px;
+            border-radius: 4px;
+            max-width: 95%;
+            line-height: 1.5;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+        .message-block .user {
+            background: #e0f7fa;
+            color: #00796b;
+            margin-right: auto;
+            font-size: 15px;
+        }
+        .message-block .bot {
+            background: #c8e6c9;
+            color: black;
+            font-size: 15px;
+        }
+        .doc-selection-message {
+            display: block;
+            margin-top: 10px;
+            color: #dc3545;
+            font-size: 15px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            font-size: 15px;
+        }
+
+        /* Loader Styles */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid green; /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader-container {
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+
+        /* Hide Ask Question button initially */
+        #ask-question-btn {
+            display: none; /* Initially hidden */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Agent For Employee Policy</h1>
+        </header>
+        
+        <main class="main-content">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- File Upload Section -->
+                <div class="form-group">
+                    <form id="upload-form" action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data">
+                        <input type="file" name="file" required>
+                        <button type="submit">Upload File</button>
+                    </form>
+                </div>
+
+                <!-- File List and Delete Section -->
+                <div class="file-list">
+                    <h2>Uploaded Files</h2>
+                    {% if files %}
+                        <ul>
+                            {% for file in files %}
+                                <li class="file-item">
+                                    {{ file }} 
+                                    <a href="{{ url_for('delete_file', filename=file) }}">Delete</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No files available.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Select Document and Language Section -->
+                <div class="form-group">
+                    <select id="selected_file" name="selected_file" required>
+                        <option value="">Select a document</option>
+                        {% for file in files %}
+                            <option value="{{ file }}">{{ file }}</option>
+                        {% endfor %}
+                    </select>
+                    <span id="doc-selection-message" class="doc-selection-message"></span>
+                </div>
+                <div class="form-group">
+                    <select id="selected_language" name="selected_language" required>
+                        <option value="en">English</option>
+                        <option value="gu">Gujarati</option>
+                        <option value="hi">Hindi</option>
+                        <option value="ta">Tamil</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- Enter Question Section -->
+                <div class="form-group">
+                    <textarea id="query_text" name="query_text" placeholder="Type your question here..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <button id="ask-question-btn">Ask Question</button>
+                </div>
+
+                <!-- Loader and Display Results -->
+                <div id="loader-container" class="loader-container">
+                    <div class="loader"></div>
+                </div>
+                <div id="result-box" class="chat-box">
+                    <!-- Results will appear here -->
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const askButton = document.getElementById('ask-question-btn');
+            const resultBox = document.getElementById('result-box');
+            const loaderContainer = document.getElementById('loader-container');
+            const selectedFile = document.getElementById('selected_file');
+            const selectedLanguage = document.getElementById('selected_language');
+            const queryText = document.getElementById('query_text');
+            const docSelectionMessage = document.getElementById('doc-selection-message');
+
+            function updateButtonVisibility() {
+                askButton.style.display = (selectedFile.value !== '' && selectedLanguage.value !== '') ? 'block' : 'none';
+            }
+
+            askButton.addEventListener('click', function () {
+                if (selectedFile.value === '') {
+                    docSelectionMessage.textContent = 'Please select a document.';
+                    return;
+                } else {
+                    docSelectionMessage.textContent = ''; // Clear message if valid
+                }
+
+                loaderContainer.style.display = 'block'; // Show loader
+
+                const formData = new FormData();
+                formData.append('query_text', queryText.value);
+                formData.append('selected_file', selectedFile.value);
+                formData.append('selected_language', selectedLanguage.value);
+
+                fetch('/ask', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const question = queryText.value;
+                    const answer = data.answer;
+
+                    // Clear the chat box and add the new user's question and the AI's answer
+                    resultBox.innerHTML = `
+                        <div class="message-block">
+                            <div class="message bot">${answer}</div>
+                        </div>
+                    `;
+                    resultBox.scrollTop = resultBox.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    loaderContainer.style.display = 'none'; // Hide loader
+                });
+
+                // Do not clear textarea after submitting
+                // Comment out or remove the following line
+                // queryText.value = ''; // Remove or comment out this line
+            });
+
+            selectedFile.addEventListener('change', function () {
+                if (selectedFile.value === '') {
+                    docSelectionMessage.textContent = 'Please select a document.';
+                } else {
+                    docSelectionMessage.textContent = '';
+                }
+                updateButtonVisibility();
+            });
+
+            selectedLanguage.addEventListener('change', function () {
+                updateButtonVisibility();
+            });
+
+            // Initialize button visibility on page load
+            updateButtonVisibility();
+        });
+    </script>
+</body>
+</html>
