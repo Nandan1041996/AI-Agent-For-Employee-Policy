@@ -1,5 +1,4 @@
 streamlit==1.36.0
-faiss-cpu==.8.0.post1
+faiss-cpu==1.8.0.post1
 langchain_huggingface
 langchain_community
-Python 3.11.9
