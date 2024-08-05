@@ -112,7 +112,10 @@ def ask_question_route():
             
         elif (ans_dict['doc']==selected_file) and (list(ans_dict.keys())[1]== query_text):
             res_ans = ans_dict[query_text][selected_language]
-    return jsonify({'answer': res_ans})
+        return jsonify({'answer': res_ans})
+    else:
+        return jsonify({'answer': 'Answer Not Found'})
+    
 
 if __name__ == '__main__':
     app.run(debug=True,use_reloader=False)
