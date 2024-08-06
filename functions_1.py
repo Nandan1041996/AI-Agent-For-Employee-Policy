@@ -5,20 +5,11 @@ from deep_translator import GoogleTranslator
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEndpoint
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings,HuggingFaceInferenceAPIEmbeddings
+from langchain_community.embeddings import HuggingFaceBgeEmbeddings
 from langchain.chains.qa_with_sources.retrieval import RetrievalQAWithSourcesChain
 from langchain.schema import Document
 
 
-with open('sek_key.json',mode='r') as f:
-    sek_key = json.load(f)
-
-
-
-# Set the environment variable
-os.environ['HUGGINGFACEHUB_API_TOKEN'] = sek_key['sek_key']
-
-api_token = os.getenv('HUGGINGFACEHUB_API_TOKEN')
 
 
 # Define text wrapping function
@@ -65,9 +56,11 @@ def model(document):
     # Initialize embeddings and vector index
     embeddings = HuggingFaceBgeEmbeddings()
     vector_index = FAISS.from_documents(docs, embeddings)
-    # print('sek_key :',sek_key)hf_hub_download
+
     # Initialize Hugging Face LLM (Language Model) Endpoint
-    llm = HuggingFaceEndpoint(repo_id='mistralai/Mistral-7B-Instruct-v0.3', temperature=0.1, huggingfacehub_api_token=sek_key['sek_key'], max_new_tokens=1000,timeout=120)
+    llm = HuggingFaceEndpoint(repo_id='mistralai/Mistral-7B-Instruct-v0.3', temperature=0.5, huggingfacehub_api_token='', max_new_tokens=1000)
+    # key# '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'
+    
     # Initialize Question Answering Chain
     chain = RetrievalQAWithSourcesChain.from_llm(llm=llm, retriever=vector_index.as_retriever())
     return chain
