@@ -59,7 +59,6 @@ def model(document):
 
     # Initialize Hugging Face LLM (Language Model) Endpoint
     llm = HuggingFaceEndpoint(repo_id='mistralai/Mistral-7B-Instruct-v0.3', temperature=0.5, huggingfacehub_api_token='', max_new_tokens=1000)
-    # key# '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'
     
     # Initialize Question Answering Chain
     chain = RetrievalQAWithSourcesChain.from_llm(llm=llm, retriever=vector_index.as_retriever())
